@@ -25,7 +25,32 @@ sdl2.dll (32bit)\
 https://www.libsdl.org/
 and\
 sdl2_mixer.dll (32bit)\
-https://github.com/libsdl-org/SDL_mixer
+https://github.com/libsdl-org/SDL_mixer\
+
+Note a number of bindings have been added to\
+SDL2_mixer.bi\
+located in <FreeBASIC-1.09.0-gcc-9.3>\inc\SDL2\
+
+Either copy the SDL2_mixer.bi included in the source\
+from\
+inc\SDL2\
+to
+<FreeBASIC-1.09.0-gcc-9.3>\inc\SDL2\
+
+or add this to <FreeBASIC-1.09.0-gcc-9.3>\inc\SDL2\SDL2_mixer.bi
+
+[code]\
+' added for version sdl2 mixer 2.6.2\
+declare function Mix_GetMusicArtistTag(byval music as Mix_Music ptr) as const zstring ptr\
+declare function Mix_GetMusicTitleTag(byval music as Mix_Music ptr) as const zstring ptr\
+declare function Mix_GetMusicAlbumTag(byval music as Mix_Music ptr) as const zstring ptr\
+declare function Mix_GetMusicCopyrightTag(byval music as Mix_Music ptr) as const zstring ptr\
+declare function Mix_MusicDuration(byval music as Mix_Music ptr) as double\
+declare function Mix_GetMusicPosition(byval music as Mix_Music ptr) as double\
+declare function Mix_GetMusicVolume(byval volume as long) as long\
+declare function Mix_MasterVolume(byval volume as long) as long\
+[/code]
+
 ## performance
 windows 7 / windows 10(1903)\
 ram usage ~2MB / 2MB\
