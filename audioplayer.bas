@@ -265,22 +265,34 @@ Function getmp3cover(filename As String) As boolean
             bend = (asc(length, 1) shl 24 + asc(length, 2) shl 16 + asc(length, 3) shl 8 or asc(length, 4))
         end if
         if instr(1, buffer, "JFIF") > 0 then
+            ' override end jpg if marker FFD9 is present
+            if instr(buffer, CHR(&hFF, &hD9)) > 0 then
+                bend = instr(1, mid(buffer, instr(1, buffer, "JFIF")), CHR(&hFF, &hD9)) + 7
+            end if
             chunk = mid(buffer, instr(buffer, "JFIF") - 6, bend)
             ext = ".jpg"
         end if
+        ' use ext to catch false png
+        if instr(1, buffer, "‰PNG") > 0 and ext = "" then
+            ' override end png if tag is present
+            if instr(1, buffer, "IEND") > 0 then
+                bend = instr(1, mid(buffer, instr(1, buffer, "‰PNG")), "IEND") + 7
+            end if
+            chunk = mid(buffer, instr(buffer, "‰PNG"), bend)
+            ext = ".png"
+        end if
         ' funky variant for non jfif and jpegs video encoding?
-        if instr(1, buffer, "Lavc58") > 0 or instr(1, buffer, "Exif") > 0 and ext = "" then
+        if (instr(1, buffer, "Lavc58") > 0 or instr(1, buffer, "Exif") > 0) and ext = "" then
+            ' override end jpg if marker FFD9 is present
+            if instr(buffer, CHR(&hFF, &hD9)) > 0 then
+                bend = instr(1, mid(buffer, instr(1, buffer, "Exif")), CHR(&hFF, &hD9)) + 7
+            end if
             if instr(1, buffer, "Exif") > 0 then
                 chunk = mid(buffer, instr(buffer, "Exif") - 6, bend)
             else
                 chunk = mid(buffer, instr(buffer, "Lavc58") - 6, bend)
             end if
             ext = ".jpg"
-        end if
-        ' use ext to catch false png
-        if instr(1, buffer, "‰PNG") > 0 and ext = "" then
-            chunk = mid(buffer, instr(buffer, "‰PNG"), bend)
-            ext = ".png"
         end if
         buffer = ""
         Close #1
