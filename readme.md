@@ -59,7 +59,6 @@ threads   4 / 7\
 cpu       ~1 (low) / ~2\
 tested on intel i5-6600T
 ## navigation
-press p     to play\
 press .     to play next\
 press ,     to play previous\
 press ]     to skip forward   10 secs\
