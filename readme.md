@@ -8,6 +8,8 @@ basic config options in conf.ini\
 locale          = <locale>\
 defaultvolume   = <1 .. 128>\
 playtype        = <shuffle, linear>\
+' dynamic range compression *currently not working with sdl\
+drc             = <true, false>\
 \
 basic help localization via:\
 help-de.ini\
@@ -65,6 +67,8 @@ press ]     to skip forward   10 secs\
 press [     to skip backwards 10 secs\
 press space to pause / play or mute / unmute\
 press r     to restart\
+press l     for linear / shuffle list play\
+press d     for dynamic range compression *note currently not working for sdl\
 press -     to increase volume\
 press +     to decrease volume\
 press esc   to quit\

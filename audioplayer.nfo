@@ -1,0 +1,27 @@
+update v1.2 15/05/2023
+- added drc, dynamic range compression can be set via conf.ini
+| placebo for now on sdl, sdl does not have a mechanism to
+| measure signal level of audio as bass does.
+- added toggle drc via key 'd' drc on or off (placeholder for now)
+- added toggle listplay via key 'l' shuffle or linear
+- added os mixer fader volume control (windows 7 and 10)
+| route: sourcevolume > drcvolume (on / off) > currentvolume( is os mixer volume)
+| source is set via config, drc amps <n>Db currentvolume is final volume output
+- improved command line handling catches incorrect files and paths
+- tweaked utilfile.bas more in line with other apps
+- tweaked shuffleplay scanning from root dir is not supported
+- tieded up code in most files
+- use init sdl with SDL_Init(SDL_INIT_AUDIO) instead of SDL_Init(SDL_INIT_VIDEO)
+| SDL_Init(SDL_INIT_AUDIO) does not block os powerplan to blank display
+| note: when using SDL_INIT_AUDIO use SDL_SetHint(SDL_HINT_VIDEO_ALLOW_SCREENSAVER, "1")
+| respond to power plan settings blank display on windows
+| note: set before sdl init (video) otherwise it will not work!
+- fixed .pls
+
+update v1.1 20/03/2023
+- better thumbnail detection in jpeg
+  pattern ffd8 ffd8 ffd9 ffd9 next to
+  pattern ffd8 ffd9 ffd8 ffd9
+- better png check using exif as check
+- removed p play option not really needed
+- misc bugfixes stability and error handling
