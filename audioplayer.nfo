@@ -1,3 +1,8 @@
+update v1.3 27/06/2023
+- reworked localization, broader ui scope, utf support and more scalable
+- update sdl2 from 2.0.22.0 to 2.26.5.0
+- implemented utilfile.bas generics for several apps
+
 update v1.2 15/05/2023
 - added drc, dynamic range compression can be set via conf.ini
 | placebo for now on sdl, sdl does not have a mechanism to

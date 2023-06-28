@@ -48,7 +48,7 @@ dim playtype    as string = "linear"
 dim itm     as string
 dim inikey  as string
 dim inival  as string
-dim inifile as string = exepath + "\conf.ini"
+dim inifile as string = exepath + "\conf\conf.ini"
 dim f       as integer
 if FileExists(inifile) = false then
     logentry("error", inifile + " file does not excist")
@@ -347,6 +347,7 @@ dim firstmp3        as integer = 1
 dim musiclevel      as single
 dim sleeplength     as integer = 1000
 
+readuilabel(exepath + "\conf\" + locale + "\menu.ini")
 getmp3cover(filename)
 Mix_VolumeMusic(sourcevolume)
 currentvolume = getvolumeosmixer() 
@@ -358,6 +359,8 @@ Do
 
     ' ghetto attempt of dynamic range compression audio
     if drc = "true" then
+        ' bass method    
+        'drcvolume = 2.0f - max(loWORD(musiclevel), HIWORD(musiclevel)) / 32768
         drcvolume = 128
         Mix_VolumeMusic(drcvolume)
     else
@@ -471,17 +474,17 @@ Do
     ' basic interaction
     Print "| SDL2 mixer library demonstration v" + exeversion
     print
-    Print "press .     play next"
-    Print "press ,     play previous"
-    Print "press ]     skip forward   10 secs"
-    Print "press [     skip backwards 10 secs"
-    Print "press space pause / play or mute / unmute"
-    Print "press r     restart"
-    Print "press l     for linear / shuffle list play"
-    Print "press d     for dynamic range compression not active for sdl"
-    Print "press -     increase volume"
-    Print "press +     decrease volume"
-    Print "press esc   quit"
+    getuilabelvalue("next")
+    getuilabelvalue("previous")
+    getuilabelvalue("forward")
+    getuilabelvalue("back")
+    getuilabelvalue("pause")
+    getuilabelvalue("restart")
+    getuilabelvalue("togglelist")
+    getuilabelvalue("drc")
+    getuilabelvalue("volumedown")
+    getuilabelvalue("volumeup")
+    getuilabelvalue("quit")
     Print
     ' tag info
     if refreshinfo = true and instr(filename, ".mp3") <> 0 then
@@ -492,26 +495,25 @@ Do
         taginfo(5) = getmp3tag("genre", filename)
         refreshinfo = false
     end if    
-    print "artist: " + taginfo(1)
-    print "title:  " + taginfo(2)
-    print "album:  " + taginfo(3)
-    print "year:   " + taginfo(4)
-    print "genre:  " + taginfo(5)
+    getuilabelvalue("artist", taginfo(1))
+    getuilabelvalue("title" , taginfo(2))
+    getuilabelvalue("album" , taginfo(3))
+    getuilabelvalue("year"  , taginfo(4))
+    getuilabelvalue("genre" , taginfo(5))
     Print
     if taginfo(1) <> "----" and taginfo(2) <> "----" and instr(filename, ".mp3") <> 0 then
-        print "current:  " + taginfo(1) + " - " + taginfo(2)       
+        getuilabelvalue("current", taginfo(1) + " - " + taginfo(2))
     else    
-        print "current:  " + mid(left(filename, len(filename) - instr(filename, "\") -1), InStrRev(filename, "\") + 1, len(filename))
+        getuilabelvalue("current", mid(left(filename, len(filename) - instr(filename, "\") -1), InStrRev(filename, "\") + 1, len(filename)))
     end if
-    print "duration: " & compoundtime(tracklength) & " / " & compoundtime(CInt(secondsPosition)) & "           "
+    getuilabelvalue("duration", compoundtime(tracklength) & " / " & compoundtime(CInt(secondsPosition)) & "           ")
     ' song list info
-    print "list:     " & maxitems & " / " & compoundtime(listduration) & " " & playtype + "  "
-    print "file:     " + filename
+    getuilabelvalue("list", maxitems & " / " & compoundtime(listduration) & " " & playtype + "  ")
+    getuilabelvalue("file", filename)
     if musicstate = false then
-        print "volume:   mute  "
+        getuilabelvalue("volume",  "mute  ")
     else
-        print using "volume:   &###-"; displayvolumeosmixer(currentvolume);
-        print "    "
+        getuilabelvalue("volume", format(displayvolumeosmixer(currentvolume), "###-       "))
     end if
     print using "drc:      &###-"; drcvolume;
     print " " & drc & "     "
