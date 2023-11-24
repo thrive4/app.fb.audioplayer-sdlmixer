@@ -3,14 +3,6 @@ basic audioplayer written in freebasic and bass\
 supported audio types are .flac, .mp3, .m4a, .mp4, .ogg, .wav\
 supported playlists .m3u, .pls\
 ascii interface\
-\
-basic config options in conf.ini\
-locale          = <en, de, fr>\
-defaultvolume   = <1 .. 128>\
-playtype        = <shuffle, linear>\
-' dynamic range compression *currently not working with sdl\
-drc             = <true, false>\
-\
 if present coverart will be extracted and written to file as thumb.jpg\
 When a file or path is specified the current dir and sub dir(s)\
 will be scanned for audio file(s) which will generate an internal playlist
@@ -18,6 +10,13 @@ will be scanned for audio file(s) which will generate an internal playlist
 audioplayer.exe "path to file or folder"\
 if a file or path is specified the folder will be scanned for an audio file\
 if the folder has subfolder(s) these will be scanned for audio files as well.
+## configuration
+basic config options in conf.ini\
+locale          = <en, de, fr, nl>\
+defaultvolume   = <1 .. 128>\
+playtype        = <shuffle, linear>\
+' dynamic range compression *currently not working with sdl\
+drc             = <true, false>
 ## requirements
 sdl2.dll (32bit)\
 https://www.libsdl.org/

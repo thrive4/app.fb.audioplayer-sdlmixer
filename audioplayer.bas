@@ -49,7 +49,7 @@ dim itm     as string
 dim inikey  as string
 dim inival  as string
 dim inifile as string = exepath + "\conf\conf.ini"
-dim f       as integer
+dim f       as long
 if FileExists(inifile) = false then
     logentry("error", inifile + " file does not excist")
 else 
@@ -89,6 +89,7 @@ select case command(1)
         ' cleanup listplay files
         delfile(exepath + "\" + "music" + ".tmp")
         delfile(exepath + "\" + "music" + ".lst")
+        delfile(exepath + "\" + "music" + ".swp")
         logentry("terminate", "normal termination " + appname)
 end select
 
@@ -231,7 +232,7 @@ end if
 
 ' listduration for recursive scan dir
 if maxitems > 1 and instr(command(1), ".m3u") = 0 and instr(command(1), ".pls") = 0 then
-    dim tmp as integer
+    dim tmp as long
     dim cnt as integer = 1
     ' count items in list
     itemlist = exepath + "\music.tmp"
@@ -343,6 +344,7 @@ dim refreshinfo     as boolean = true
 dim taginfo(1 to 5) as string
 dim firstmp3        as integer = 1
 dim musiclevel      as single
+dim maxlevel        as single
 dim sleeplength     as integer = 1000
 
 readuilabel(exepath + "\conf\" + locale + "\menu.ini")
@@ -358,7 +360,8 @@ Do
     ' ghetto attempt of dynamic range compression audio
     if drc = "true" then
         ' bass method    
-        'drcvolume = 2.0f - max(loWORD(musiclevel), HIWORD(musiclevel)) / 32768
+        'maxlevel = min(loWORD(musiclevel), HIWORD(musiclevel)) / 32768.0f
+        'drcvolume = ((1.0f + (4.75f - maxlevel)) - maxlevel) * sourcevolume
         drcvolume = 128
         Mix_VolumeMusic(drcvolume)
     else
@@ -499,7 +502,7 @@ Do
     getuilabelvalue("year"  , taginfo(4))
     getuilabelvalue("genre" , taginfo(5))
     Print
-    if taginfo(1) <> "----" and taginfo(2) <> "----" and instr(filename, ".mp3") <> 0 then
+    if taginfo(1) <> "----" and taginfo(2) <> "----" then
         getuilabelvalue("current", currentsong & ". " & taginfo(1) + " - " + taginfo(2))
     else    
         getuilabelvalue("current", currentsong & ". " & mid(left(filename, len(filename) - instr(filename, "\") -1), InStrRev(filename, "\") + 1, len(filename)))
@@ -524,6 +527,7 @@ cleanup:
 ' cleanup listplay files
 delfile(exepath + "\" + "music" + ".tmp")
 delfile(exepath + "\" + "music" + ".lst")
+delfile(exepath + "\" + "music" + ".swp")
 delfile(exepath + "\thumb.jpg")
 delfile(exepath + "\thumb.png")
 

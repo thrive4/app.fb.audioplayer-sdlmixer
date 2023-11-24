@@ -1,10 +1,25 @@
-update v1.4 (todo implement reworked log)
+update v1.5 24/11/2023
+- corrected freefile variable type to long
+  integer causes issues when opening multiple
+  file in succession
+- trimmed utilfile.bas
+- reworked shuffleplay...again... should now
+  work as intended; only play a item in the set once
+  untill the set is exhausted.
+- tweaked drc, volume was stil choppy with certain
+  music is now more in line with, xmplay's auto amp
+  dynamic gain, as such more smoother.
+- added dutch (nl) as locale
+- tidy up conf.ini
+- added .wbfe (winfbe) project file
+
+update v1.4 28/10/2023
 - fixed log creation (missing message)
 - fixed appname made truncation .exe optional
 - fixed checkpath did not set correct path after
   function exit when path is correct
-- fixed list when initating with a specific track or song
-- reduced probabilty of same track playing in shuffle mode
+- fixed list when initiating with a specific track or song
+- reduced probability of same track playing in shuffle mode
 - display current track / song number
 - misc fixes to getmp3cover
 
