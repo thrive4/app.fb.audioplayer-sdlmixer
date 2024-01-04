@@ -22,7 +22,7 @@ sdl2.dll (32bit)\
 https://www.libsdl.org/
 and\
 sdl2_mixer.dll (32bit)\
-https://github.com/libsdl-org/SDL_mixer\
+https://github.com/libsdl-org/SDL_mixer
 
 Note a number of bindings have been added to\
 SDL2_mixer.bi\
