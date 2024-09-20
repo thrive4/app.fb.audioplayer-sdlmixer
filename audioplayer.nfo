@@ -1,3 +1,21 @@
+update v1.6 20/09/2024
+- getuilabelvalue implemented full automatic spacing
+- added generate m3u by searching on one tag
+  artist, title, album, genre and year
+  audioplayer <audiosource> <tag> <tagquery>
+  example: audioplayer.exe g:\data\mp3\classic artist beethoven
+  generates the m3u file beethoven.m3u
+  which then can be played by audioplayer.exe beethoven.m3u
+  notes:
+  * simple search so 195 is equivelant of ?195? or *195*
+  * runtime in seconds is not calculated default is #EXTINF:134
+  * no explicit wildcard support
+- tweaked getmp3tag increase speed parsing mp3 tags
+- trimmed utilfile.bas
+- fixed .pls parsing and playback
+- update sdl2       from 2.26.5.0 to 2.30.7.0
+- update sdl2_mixer from 2.6.2.0 to 2.8.0.0
+
 update v1.5 24/11/2023
 - corrected freefile variable type to long
   integer causes issues when opening multiple

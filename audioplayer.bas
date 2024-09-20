@@ -117,7 +117,7 @@ else
         logentry("fatal", imagefolder + " does not excist or is incorrect")
     end if
 end if
-if instr(command(1), ".m3u") = 0 and instr(command(1), ".pls") = 0 then
+if instr(command(1), ".m3u") = 0 and instr(command(1), ".pls") = 0 and len(command(2)) = 0 then
     maxitems = createlist(imagefolder, filetypes, "music")
     filename = listplay(playtype, "music")
 end if
@@ -127,6 +127,70 @@ if instr(command(1), ".") <> 0 and instr(command(1), ".m3u") = 0 and instr(comma
     imagefolder = left(command(1), instrrev(command(1), "\") - 1)
     maxitems = createlist(imagefolder, filetypes, "music")
     currentsong = setcurrentlistitem("music", command(1))
+end if
+
+' search with query and export .m3u 
+if instr(command(1), ":") <> 0 and len(command(2)) <> 0 then
+    select case command(2)
+        case "artist"
+        case "title"
+        case "album"
+        case "year"
+        case "genre"
+        case else
+            logentry("fatal", "unknown tag '" & command(2) & "' valid tags artist, title, album, genre and year")
+    end select
+
+    maxitems = exportm3u(command(1), "*.mp3", "m3u", "exif", command(2), command(3))
+    filename = getmp3playlist(exepath + "\" + command(3) + ".m3u")
+    currentsong = setcurrentlistitem("music", filename)
+    if currentsong = 1 then
+        logentry("fatal", "no matches found for " + command(3) + " in " + command(2))
+    end if
+end if
+
+if instr(command(1), ".pls") <> 0 or instr(command(1), ".m3u") <> 0 then
+    filename = command(1)
+    Open filename For input As 1
+    open exepath + "\music.tmp" for output as 2
+    itemnr = 0
+    Do Until EOF(1)
+        Line Input #1, listitem
+        ' ghetto parsing pls
+        if instr(listitem, "=") > 0 and instr(command(1), ".pls") <> 0 then
+            select case true
+                case instr(listitem, "file") > 0
+                    print #2, mid(listitem, instr(listitem, "=") + 1, len(listitem))
+                case instr(listitem, "title") > 0
+                case instr(listitem, "length") > 0
+                    listduration = listduration + val(mid(listitem, instr(listitem, "=") + 1, len(listitem)))
+                    itemnr += 1
+                case len(listitem) = 0
+                    'nop
+                case else
+                    'msg64 = msg64 + listitem
+            end select
+        end if
+        ' ghetto parsing m3u
+        if len(listitem) > 0 and instr(command(1), ".m3u") <> 0 then
+            select case true
+                case instr(listitem, "EXTINF:") > 0
+                    listduration = listduration + val(mid(listitem, instr(listitem, ":") + 1, len(instr(listitem, ","))- 1))
+                    itemnr += 1
+                case instr(listitem, ".") > 0
+                    print #2, listitem
+                case len(listitem) = 0
+                    'nop
+                case else
+                    'msg64 = msg64 + listitem
+            end select
+        end if
+    Loop
+    maxitems = itemnr
+    close
+    filename = getmp3playlist(command(1))
+    currentsong = setcurrentlistitem("music", filename)
+    logentry("notice", "parsing and playing plylist " + filename)
 end if
 
 initsdl:
@@ -175,60 +239,6 @@ function compoundtime(m As Long) as string
     Next
     return dummy
 End function
-
-if instr(command(1), ".pls") <> 0 then
-    filename = command(1)
-    Open filename For input As 1
-    open "music.tmp" for output as 2
-    itemnr = 0
-    Do Until EOF(1)
-        Line Input #1, listitem
-        ' ghetto parsing pls
-        if instr(listitem, "=") > 0 then
-            select case true
-                case instr(listitem, "numberofentries") > 0
-                    maxitems = val(mid(listitem, instr(listitem, "=") + 1, len(listitem)))
-                case instr(listitem, "file" + str(itemnr)) > 0
-                    print #2, mid(listitem, instr(listitem, "=") + 1, len(listitem))
-                case instr(listitem, "title" + str(itemnr)) > 0
-                case instr(listitem, "length" + str(itemnr)) > 0
-                    listduration = listduration + val(mid(listitem, instr(listitem, "=") + 1, len(listitem)))
-                    itemnr += 1
-                case len(listitem) = 0
-                    'nop
-                case else
-                    'msg64 = msg64 + listitem
-            end select
-        end if
-    Loop
-    close
-end if
-
-if instr(command(1), ".m3u") <> 0 then
-    filename = command(1)
-    Open filename For input As 1
-    open "music.tmp" for output as 2
-    itemnr = 0
-    Do Until EOF(1)
-        Line Input #1, listitem
-        ' ghetto parsing m3u
-        if len(listitem) > 0 then
-            select case true
-                case instr(listitem, "EXTINF:") > 0
-                    listduration = listduration + val(mid(listitem, instr(listitem, ":") + 1, len(instr(listitem, ","))- 1))
-                    itemnr += 1
-                case instr(listitem, ".") > 0
-                    print #2, listitem
-                case len(listitem) = 0
-                    'nop
-                case else
-                    'msg64 = msg64 + listitem
-            end select
-        end if
-    Loop
-    maxitems = itemnr
-    close
-end if
 
 ' listduration for recursive scan dir
 if maxitems > 1 and instr(command(1), ".m3u") = 0 and instr(command(1), ".pls") = 0 then
@@ -341,7 +351,6 @@ end function
 
 ' init playback
 dim refreshinfo     as boolean = true
-dim taginfo(1 to 5) as string
 dim firstmp3        as integer = 1
 dim musiclevel      as single
 dim maxlevel        as single
@@ -489,11 +498,7 @@ Do
     Print
     ' tag info
     if refreshinfo = true and instr(filename, ".mp3") <> 0 then
-        taginfo(1) = getmp3tag("artist",filename)
-        taginfo(2) = getmp3tag("title", filename)
-        taginfo(3) = getmp3tag("album", filename)
-        taginfo(4) = getmp3tag("year",  filename)
-        taginfo(5) = getmp3tag("genre", filename)
+        getmp3baseinfo(filename)
         refreshinfo = false
     end if    
     getuilabelvalue("artist", taginfo(1))
