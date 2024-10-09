@@ -1,3 +1,10 @@
+update v1.7 08/10/2024
+- fixed .pls and .mru parsing again...
+  a music.lst was not generated
+  compacted code that handles playlists
+- addressed similar issue with search
+- update sdl2       from 2.30.7.0 to 2.30.8.0
+
 update v1.6 20/09/2024
 - getuilabelvalue implemented full automatic spacing
 - added generate m3u by searching on one tag

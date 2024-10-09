@@ -584,9 +584,8 @@ function getmp3baseinfo(fx1File as string) as boolean
     return true
 end function
 
-function getmp3playlist(filename as string) as string
-    dim dummy        as string
-    dim              as long f, g
+function getmp3playlist(filename as string) as integer
+    dim              as long f, g, h
     dim itemnr       as integer = 1
     dim listitem     as string
     dim listduration as integer
@@ -599,17 +598,19 @@ function getmp3playlist(filename as string) as string
         case instr(filename, ".m3u") > 0
             mp3listtype = "m3u"
         case else
-            return ""
+            return 0
     end select    
 
     if len(filename) = 0 then
-        logentry("warning", filename + " with gettextfile path or file not found.")
+        logentry("warning", filename + " path or file not found.")
     else
         logentry("notice", "parsing and playing plylist " + filename)
     end if
     Open filename For input As #f
     g = freefile
     open exepath + "\" + "music.tmp" for output as #g
+    h = freefile
+    open exepath + "\" + "music.lst" for output as #h
     itemnr = 0
 
     Do Until EOF(f)
@@ -620,12 +621,11 @@ function getmp3playlist(filename as string) as string
                 select case true
                     case instr(listitem, "file") > 0
                         print #g, mid(listitem, instr(listitem, "=") + 1, len(listitem))
-                        ' todo store first song in list
-                        dummy =  mid(listitem, instr(listitem, "=") + 1, len(listitem))
+                        print #h, mid(listitem, instr(listitem, "=") + 1, len(listitem))
+                        itemnr += 1
                     case instr(listitem, "title" + str(itemnr)) > 0
                     case instr(listitem, "length" + str(itemnr)) > 0
                         listduration = listduration + val(mid(listitem, instr(listitem, "=") + 1, len(listitem)))
-                        itemnr += 1
                     case len(listitem) = 0
                         'nop
                     case else
@@ -640,10 +640,10 @@ function getmp3playlist(filename as string) as string
                 select case true
                     case instr(listitem, "EXTINF:") > 0
                         listduration = listduration + val(mid(listitem, instr(listitem, ":") + 1, len(instr(listitem, ","))- 1))
-                        itemnr += 1
                     case instr(listitem, ".") > 0
                         print #g, listitem
-                        dummy = listitem
+                        print #h, listitem
+                        itemnr += 1
                     case len(listitem) = 0
                         'nop
                     case else
@@ -653,9 +653,10 @@ function getmp3playlist(filename as string) as string
         end if
     Loop
     'maxmusicitems = itemnr
-    close(g)
     close(f)
-    return dummy
+    close(g)
+    close(h)
+    return itemnr
 
 end function
 
