@@ -1,3 +1,15 @@
+update v1.8 16/10/2025
+- fix resolvepath handling of ..\<path>\<file>
+- fix to commandline handling resolvepath after switches -v, etc
+- fixed error handling locale
+- regression checkpath (see 1.2) fixed again
+- slimmed down function explode
+- re-orded declaration variables caused issue with goto
+- update sdl2 from 2.30.8.0 to 2.32.4.0
+- update generic file functions added drive label and storage
+  and convertbytesize
+- added spanish
+
 update v1.7 08/10/2024
 - fixed .pls and .mru parsing again...
   a music.lst was not generated
