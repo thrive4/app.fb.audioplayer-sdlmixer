@@ -1,0 +1,25 @@
+#EXTM3U
+#EXTINF:-1,uk3 internet-radio
+http://uk3.internet-radio.com:8082/live
+#EXTINF:-1,capital fm london
+http://media-ice.musicradio.com/CapitalMP3
+#EXTINF:-1,jazz london radio
+http://radio.canstream.co.uk:8075/live.mp3
+#EXTINF:-1,kexp seattle
+http://live-mp3-128.kexp.org
+#EXTINF:-1,radio caroline
+http://78.129.202.10:8030/
+#EXTINF:-1,radio nl
+https://stream.radionl.fm/radionl
+#EXTINF:-1,france inter
+http://direct.franceinter.fr/live/franceinter-midfi.mp3
+#EXTINF:-1,orf oe1 osterreich
+http://orf-live.ors-shoutcast.at/oe1-q2a
+#EXTINF:-1,deutschlandfunk
+http://st01.dlf.de/dlf/01/128/mp3/stream.mp3
+#EXTINF:-1,bbc world service
+http://stream.live.vc.bbcmedia.co.uk/bbc_world_service
+#EXTINF:-1,radio srf 1 schweiz
+http://stream.srg-ssr.ch/m/drs1/mp3_128
+#EXTINF:-1,Radio Nacional Spain
+http://rtve.stream/rne/rne1.mp3
