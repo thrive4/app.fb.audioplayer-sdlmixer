@@ -327,20 +327,22 @@ End Function
 
 ' resolve path commandline argument
 Function resolvepath(path As String) As String
-
     Dim buffer        as String * 260
     dim resolvedpath  as string
     Dim length        as Integer 
-    length = GetFullPathName(path, 260, buffer, Null)
 
-    resolvedpath = Left(buffer, length)
-    if checkpath(resolvedpath) = false and instr(path, "..") = 0 then
+    if left$(lcase(path), 7) = "http://" or left$(lcase(path), 8) = "https://" then
         resolvedpath = path
-    end if  
-
+    else
+        length = GetFullPathName(path, 260, buffer, Null)
+        If length > 0 Then
+            resolvedpath = Left(buffer, length)
+        Else
+            resolvedpath = path ' fallback if API fails
+        End If
+    end if
     return resolvedpath
-
-end function
+End Function
 
 ' localization file functions
 ' ______________________________________________________________________________'

@@ -198,6 +198,7 @@ Function getmp3cover(filename As String) As boolean
     end if
 end function
 
+
 ' get base mp3 info
 dim shared taginfo(1 to 5) as string
 function getmp3baseinfo(fx1File as string) as boolean
@@ -215,18 +216,52 @@ function getmp3baseinfo(fx1File as string) as boolean
     return true
 end function
 
-function getmp3playlist(filename as string, listname as string) as integer
-    dim              as long f, g, h
+/'
+' get http stream info
+function gethttpstreaminfo(fx1Handle as HSTREAM) as boolean
+    dim as const zstring ptr meta
+    dim as string artist,title
+    ' shoutcast
+    meta = BASS_ChannelGetTags(fx1Handle, BASS_TAG_META)
+    ' icecast
+    if meta = 0 then
+        meta = BASS_ChannelGetTags(fx1Handle, BASS_TAG_OGG)
+    end if
+    if meta <> 0 then
+        dim as string raw       = *meta
+        dim as integer start    = instr(raw, "'") + 1
+        dim as integer endpos   = instr(start, raw, "';")
+        title     = mid(raw, start, endpos - start)
+        dim as integer dashpos  = instr(title, " - ")
+        if dashpos > 0 then
+            artist = left(title, dashpos - 1)
+            title  = mid(title, dashpos + 3)
+        else
+            artist = title ' artist and title
+        end if
+       ' print *meta        
+    end if
+    taginfo(1) = artist
+    taginfo(2) = title
+    taginfo(3) = "----"
+    taginfo(4) = "----"
+    taginfo(5) = "----"
+    return true
+end function
+'/
+
+function getmp3playlist(filename as string, listtype as string) as integer
+    dim              as long f
     dim itemnr       as integer = 1
     dim listitem     as string
-    dim listduration as integer
+    'dim listduration as integer
     dim mp3listtype  as string = ""
-    f = freefile
+    dim temptitle    as string = ""
 
     select case true  
-        case instr(filename, ".pls") > 0
+        case instr(lcase(filename), ".pls") > 0
             mp3listtype = "pls"
-        case instr(filename, ".m3u") > 0
+        case instr(lcase(filename), ".m3u") > 0
             mp3listtype = "m3u"
         case else
             return 0
@@ -237,58 +272,76 @@ function getmp3playlist(filename as string, listname as string) as integer
     else
         logentry("notice", "parsing and playing plylist " + filename)
     end if
+    f = freefile
     Open filename For input As #f
-    g = freefile
-    open exepath + "\" + listname + ".tmp" for output as #g
-    h = freefile
-    open exepath + "\" + listname + ".lst" for output as #h
     itemnr = 0
 
-    Do Until EOF(f)
-        Line Input #f, listitem
-        ' ghetto parsing pls
+    do until eof(f)
+        line input #f, listitem
+        listitem = trim(listitem)
+
         if mp3listtype = "pls" then
             if instr(listitem, "=") > 0 then
                 select case true
-                    case instr(listitem, "file") > 0
-                        print #g, mid(listitem, instr(listitem, "=") + 1, len(listitem))
-                        print #h, mid(listitem, instr(listitem, "=") + 1, len(listitem))
+                    case instr(lcase(listitem), "file") = 1
                         itemnr += 1
-                    case instr(listitem, "title" + str(itemnr)) > 0
-                    case instr(listitem, "length" + str(itemnr)) > 0
-                        listduration = listduration + val(mid(listitem, instr(listitem, "=") + 1, len(listitem)))
-                    case len(listitem) = 0
-                        'nop
+                        redim preserve listrec.listname(0 to itemnr)
+                        redim preserve listrec.listfile(0 to itemnr)
+                        redim preserve listrec.listtype(0 to itemnr)
+                        redim preserve listrec.listseqh(0 to itemnr)
+                        listrec.listfile(itemnr) = trim( mid(listitem, instr(listitem, "=") + 1) )
+                        listrec.listname(itemnr) = ""
+                        listrec.listtype(itemnr) = listtype
+                        listrec.listseqh(itemnr) = 0
+                    case instr(lcase(listitem), "title") = 1
+                        if itemnr >= 0 then
+                            listrec.listname(itemnr) = trim( mid(listitem, instr(listitem, "=") + 1) )
+                        end if
                     case else
-                        'msg64 = msg64 + listitem
+                        ' nop
                 end select
             end if
         end if
-        ' ghetto parsing m3u
+
         if mp3listtype = "m3u" then
-            ' ghetto parsing m3u
             if len(listitem) > 0 then
                 select case true
-                    case instr(listitem, "EXTINF:") > 0
-                        listduration = listduration + val(mid(listitem, instr(listitem, ":") + 1, len(instr(listitem, ","))- 1))
-                    case instr(listitem, ".") > 0
-                        print #g, listitem
-                        print #h, listitem
+                    case left(listitem, 7) = "#EXTINF"
+                        dim as integer p = instr(listitem, ",")
+                        if p > 0 then
+                            temptitle = trim( mid(listitem, p + 1) )
+                        else
+                            temptitle = ""
+                        end if
+                    case left(listitem, 1) <> "#"
+                        ' file/url line (after EXTINF or plain entry)
                         itemnr += 1
-                    case len(listitem) = 0
-                        'nop
+                        redim preserve listrec.listname(0 to itemnr)
+                        redim preserve listrec.listfile(0 to itemnr)
+                        redim preserve listrec.listtype(0 to itemnr)
+                        redim preserve listrec.listseqh(0 to itemnr)
+                        listrec.listfile(itemnr) = listitem
+                        listrec.listname(itemnr) = temptitle
+                        listrec.listtype(itemnr) = listtype
+                        listrec.listseqh(itemnr) = 0
+                        temptitle = ""
                     case else
-                        'msg64 = msg64 + listitem
+                        ' nop
                 end select
             end if
         end if
-    Loop
+    loop
+    close f
+    'for i as integer = 0 to ubound(listrec.listname)
+    '    with listrec
+    '        print listrec.listname(i)
+    '        print listrec.listfile(i)
+    '        print listrec.listtype(i)
+    '        print listrec.listseqh(i)
+    '    end with
+    'next i
     'maxmusicitems = itemnr
-    close(f)
-    close(g)
-    close(h)
     return itemnr
-
 end function
 
 ' export m3u
@@ -328,7 +381,7 @@ function exportm3u(folder as string, filterext as string, listtype as string = "
         end if
     end if
 
-    recnr = 0
+    itemnr = 0
     cls
     while i <= n
     file = dir(path(i) + "*" , fbNormal or fbDirectory, @attrib)
@@ -354,8 +407,8 @@ function exportm3u(folder as string, filterext as string, listtype as string = "
                             if instr(filterext, ".mp3") > 0 and htmloutput = "exif" then
                                 Locate 1, 1   
                                 print "scanning " & folder + " with filespec " + filterext + " with tag " & tag & " contains " & tagquery
-                                print str(recnr)
-                                recnr += 1
+                                print str(itemnr)
+                                itemnr += 1
                                 ' path(i) folder and drive
                                 getmp3baseinfo(path(i) + file)
                                 argc(0) = "artist"
@@ -391,8 +444,8 @@ function exportm3u(folder as string, filterext as string, listtype as string = "
         i += 1
     wend
 
-    recnr = recnr - 1
-    print "scanned " & recnr & " files in " + folder + " with filespec " + filterext + " " & maxfiles & " file(s) found with " & tag & " " & tagquery
+    itemnr = itemnr - 1
+    print "scanned " & itemnr & " files in " + folder + " with filespec " + filterext + " " & maxfiles & " file(s) found with " & tag & " " & tagquery
     logentry("notice", "scanned and exported m3u")
     close(20)
     return maxfiles

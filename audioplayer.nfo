@@ -1,3 +1,16 @@
+update v1.9 29/12/2025
+- major rewrite due to implementing new listplay
+  shuffleplay now superseded by listplay
+  better random shuffle plus has history that keeps
+  tab of previous random selected items
+- updated conf.ini to v1.1 removed screen settings
+  they are not used by app added default mediafolder
+  location audio files
+- fixed selecting single file via commandline
+  was not set as current in list
+- tweaked calculating list duration and localized it
+- harmonized help files and added switches
+
 update v1.8 16/10/2025
 - fix resolvepath handling of ..\<path>\<file>
 - fix to commandline handling resolvepath after switches -v, etc
